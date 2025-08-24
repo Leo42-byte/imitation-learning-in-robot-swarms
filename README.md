@@ -5,7 +5,7 @@ It implements and evaluates imitation learning experiments with single-teacher a
 
 
 ## Installation
-
+This project has been tested with **Ubuntu 20.04 LTS** and **ARGoS3**.  
 1. Install [ARGoS3] and ensure it runs correctly.  
 
 2. Running Experiments：
