@@ -8,7 +8,7 @@ It implements and evaluates imitation learning experiments with single-teacher a
 
 1. Install [ARGoS3] and ensure it runs correctly.  
 
-2. Running Experiments
-argos3 -c configs/imitation_learning.argos
+2. Running Experiments：
+argos3 -c imitation_learning.argos
 
 Note: The demonstrator's trajectory shape and number of repetitions can be adjusted by modifying the variables polygon_sides and demo_repeat_target in the Lua controller file.
