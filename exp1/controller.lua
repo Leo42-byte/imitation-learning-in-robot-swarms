@@ -25,7 +25,7 @@ local is_exist_segments_demo = false
 role = "idle"
 local is_following = false
 
-EPSILON = 50 -- a coefficient to increase the force of the repulsion/attraction function
+EPSILON = 50 
 WHEEL_SPEED = 8 -- max wheel speed
 
 repulsion_gain = 2
@@ -99,7 +99,7 @@ function step()
             if robot.id == "demo" then
                 -- log("[DEBUG] Robot is the demonstrator, executing polygon motion.")
                 --    PolygonMotion()
-            else -- 有问题,learner变成teacher后，还是会执行PolygonMotion，但现在是变成teacher后不做imitate运动，考虑要保存之前学习到的轨迹
+            else 
                 -- log("[DEBUG] Robot is not the demonstrator, skipping polygon motion.")
                 -- ImitateTrajectory()
             end
@@ -330,7 +330,7 @@ function PolygonMotion(polygon_sides)
     end
 
     if IsObstacleAhead(0.2) then
-        robot.wheels.set_velocity(0, 0) -- 暂停
+        robot.wheels.set_velocity(0, 0) 
         return
     end
 
@@ -399,68 +399,12 @@ function RecordObservation()
     end
 end
 
--- function DetectTurnPoints(points, angle_threshold_deg, window)
---    local result = {}
---    local angle_threshold = math.rad(angle_threshold_deg)
---    local i = window + 1
 
---    while i <= #points - window - 1 do
---       local moving = false
---       for j = -window, window - 1 do
---          local p1 = points[i + j]
---          local p2 = points[i + j + 1]
---          if not p1 or not p2 then moving = true break end
---          local dx = p2.x - p1.x
---          local dy = p2.y - p1.y
---          local dist = math.sqrt(dx * dx + dy * dy)
---          if dist > 0.0 then
---             moving = true
---             break
---          end
---       end
-
---       if not moving then
---          local block = find_repeated_block(points, i)
-
---          local start_idx = block[1]
---          local end_idx = block[#block]
---          local center_idx = math.floor((start_idx + end_idx) / 2)
---          local p_mid = points[center_idx]
---          local p_prev = points[start_idx - 1]
---          local p_next = points[end_idx + 1]
-
---          if p_prev and p_mid and p_next then
---             log(string.format("[DEBUG] P_mid: (%.2f, %.2f), P_prev: (%.2f, %.2f), P_next: (%.2f, %.2f)",
---             p_mid.x, p_mid.y, p_prev.x, p_prev.y, p_next.x, p_next.y))
---             local dx1 = p_mid.x - p_prev.x
---             local dy1 = p_mid.y - p_prev.y
---             local dx2 = p_next.x - p_mid.x
---             local dy2 = p_next.y - p_mid.y
-
---             local angle1 = math.atan2(dy1, dx1)
---             local angle2 = math.atan2(dy2, dx2)
---             local delta = math.abs(angle_diff(angle1, angle2))
-
---             if delta > angle_threshold then
---                table.insert(result, center_idx)
---                log(string.format("[DEBUG] Detected turn point at index %d: (%.2f, %.2f), angle change = %.2f°",
---                   center_idx, p_mid.x, p_mid.y, math.deg(delta)))
---             end
---          end
-
---          i = end_idx + 1
---       else
---          i = i + 1
---       end
---    end
-
---    return result
--- end
 
 function DetectTurnPoints(points, angle_threshold_deg, window)
     local result = {}
     local angle_threshold = math.rad(angle_threshold_deg)
-    local tolerance = 0.05 -- 距离容差
+    local tolerance = 0.05 
     local i = window + 1
 
     while i <= #points - window - 1 do
@@ -486,7 +430,6 @@ function DetectTurnPoints(points, angle_threshold_deg, window)
             local center_idx = math.floor((start_idx + end_idx) / 2)
             local p_mid = points[center_idx]
 
-            -- 向前找不重复点
             local p_prev = nil
             for offset = 1, window do
                 local idx = start_idx - offset
@@ -496,7 +439,7 @@ function DetectTurnPoints(points, angle_threshold_deg, window)
                 end
             end
 
-            -- 向后找不重复点
+    
             local p_next = nil
             for offset = 1, window do
                 local idx = end_idx + offset
@@ -547,7 +490,7 @@ function DetectTurnPointsAngle(points, angle_threshold_deg)
         local diff = math.abs(NormalizeAngleDifference(angle1, angle2))
 
         if diff >= angle_threshold then
-            table.insert(result, i)  -- 当前点是一个转角点
+            table.insert(result, i) 
         end
     end
 
@@ -601,7 +544,7 @@ function ImitateTrajectory()
     table.insert(trajectory_learner, {
         x = pos.x * 100,
         y = pos.y * 100
-    }) -- 转换为厘米
+    }) 
     if not seg then
         current_segment = 1
         robot.wheels.set_velocity(0, 0)
@@ -613,7 +556,7 @@ function ImitateTrajectory()
     end
 
     if IsObstacleAhead(0.1) then
-        robot.wheels.set_velocity(0, 0) -- 暂停
+        robot.wheels.set_velocity(0, 0) 
         return
     end
 
@@ -718,7 +661,7 @@ function FollowDemonstrator()
         local speeds = ComputeSpeedFromAngle(demo_angle)
         robot.wheels.set_velocity(speeds[1], speeds[2])
     else
-        robot.wheels.set_velocity(0, 0) -- 停止运动
+        robot.wheels.set_velocity(0, 0) 
     end
 end
 
@@ -833,7 +776,7 @@ function ComputeImitationQuality(demo_segments, learner_segments)
     local len_diff_sum = 0
     local min_len = math.min(#demo_segments, #learner_segments)
 
-    -- 计算长度误差
+  
     for i = 1, min_len do
         local d_seg = demo_segments[i]
         local l_seg = learner_segments[i]
@@ -847,7 +790,7 @@ function ComputeImitationQuality(demo_segments, learner_segments)
         Ql = 1 - (len_diff_sum / len_sum)
     end
 
-    -- 改进的 Qa：用转角差而非绝对方向角差
+  
     local demo_turn_sum = 0
     local turn_diff_sum = 0
 
@@ -865,14 +808,10 @@ function ComputeImitationQuality(demo_segments, learner_segments)
         Qa = 1 - (turn_diff_sum / demo_turn_sum)
     end
 
-    -- 段数匹配质量
-    -- local l = #learner_segments
-    -- local d = #demo_segments
-    -- if l == 0 and d == 0 then return 1 end      -- 两者都没段：认为完全匹配
+  
     
     local Qs = 1 - math.abs(#learner_segments - #demo_segments) / #demo_segments
 
-    -- 加权合并
     local L, A, S = 1, 1, 1
     local quality = (L * Ql + A * Qa + S * Qs) / (L + A + S)
     if quality < 0 then
@@ -887,7 +826,7 @@ function IsObstacleAhead(threshold)
         local sensor = robot.proximity[i]
         local angle = sensor.angle
         local value = sensor.value
-        -- 前方 ±45度内 && 强度大于阈值
+
         if math.abs(angle) < math.rad(45) and value > threshold then
             return true
         end
@@ -936,14 +875,14 @@ function find_repeated_block(points, i, tolerance)
     local block = {i}
     local ref = points[i]
 
-    -- 向左扩展
+  
     local j = i - 1
     while j >= 1 and point_distance(points[j], ref) <= tolerance do
         table.insert(block, 1, j)
         j = j - 1
     end
 
-    -- 向右扩展
+
     j = i + 1
     while j <= #points and point_distance(points[j], ref) <= tolerance do
         table.insert(block, j)
@@ -958,7 +897,7 @@ function ComputeAngle(p1, p2)
 end
 
 function IsSamePoint(p1, p2, epsilon)
-    epsilon = epsilon or 1e-4  -- 可调精度
+    epsilon = epsilon or 1e-4  
     return math.abs(p1.x - p2.x) < epsilon and math.abs(p1.y - p2.y) < epsilon
 end
 
@@ -989,8 +928,7 @@ function is_cluster_turning(cluster, angle_threshold)
    return false
 end
 
--- 简化主路径抽取：半径–计数迭代聚合（RCIA）
--- 兼容旧签名：min_support 作为 k，repeat_eps / min_repeat 忽略
+
 function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repeat)
     local r = radius 
     local k = min_support
@@ -999,7 +937,6 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
         return {}
     end
 
-    -- 拷贝一份 remaining，保持 {x=, y=} 结构；始终取 remaining[1] 作为参考点以保时间顺序
     local remaining = {}
     for i, p in ipairs(points) do
         remaining[i] = { x = p.x, y = p.y }
@@ -1010,7 +947,6 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
     while #remaining > 0 do
         local ref = remaining[1]
 
-        -- 以半径 r 收集局部簇（索引）
         local cluster_idx = {}
         for i = 1, #remaining do
             if point_distance(remaining[i], ref) <= r then
@@ -1019,7 +955,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
         end
 
         if #cluster_idx >= k then
-            -- 质心聚合并删除整个邻域
+    
             local cx, cy = 0.0, 0.0
             for _, idx in ipairs(cluster_idx) do
                 cx = cx + remaining[idx].x
@@ -1029,12 +965,12 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             cy = cy / #cluster_idx
             main_path[#main_path + 1] = { x = cx, y = cy }
 
-            -- 逆序删除，避免下标塌陷
+       
             for i = #cluster_idx, 1, -1 do
                 table.remove(remaining, cluster_idx[i])
             end
         else
-            -- 不够 k：为保持连贯性，仅保留参考点本身，然后删除它
+   
             main_path[#main_path + 1] = { x = ref.x, y = ref.y }
             table.remove(remaining, 1)
         end
@@ -1045,93 +981,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
     return main_path
 end
 
--- function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repeat)
---     local remaining = {}
---     for _, p in ipairs(points) do
---         table.insert(remaining, p)
---     end
 
---     local main_path = {}
-
---     while #remaining > 0 do
---         local ref = remaining[1]
---         local cluster = {ref}
---         local to_remove = {1}
-
---         -- 聚合半径范围内收集近邻点
---         for i = 2, #remaining do
---             local p = remaining[i]
---             if point_distance(p, ref) <= radius then
---                 table.insert(cluster, p)
---                 table.insert(to_remove, i)
---             end
---         end
-
---         -- 判断是否为“重复点”（在 repeat_eps 内重复 min_repeat 次以上）
---         local repeat_count = 0
---         for _, p in ipairs(points) do
---             if point_distance(p, ref) <= repeat_eps then
---                 repeat_count = repeat_count + 1
---             end
---         end
-
---         --   if repeat_count >= min_repeat then
---         --      -- 作为拐点：把 cluster 中所有点原样加入
---         --      for _, p in ipairs(cluster) do
---         --         table.insert(main_path, {x = p.x, y = p.y})
---         --      end
---         local is_turning = is_cluster_turning(cluster, math.rad(20))
-
---         if is_turning then
---             -- 是拐角：保留所有点
---             for _, p in ipairs(cluster) do
---                 table.insert(main_path, {
---                     x = p.x,
---                     y = p.y
---                 })
---             end
-
---         elseif repeat_count >= min_repeat then
---             -- 如果是重复点（停留），就只取一个平均点加入主路径
---             local sum_x, sum_y = 0, 0
---             for _, p in ipairs(cluster) do
---                 sum_x = sum_x + p.x
---                 sum_y = sum_y + p.y
---             end
---             local avg = {
---                 x = sum_x / #cluster,
---                 y = sum_y / #cluster
---             }
---             table.insert(main_path, avg)
-
---         elseif #cluster >= min_support then
---             -- 否则正常取平均聚合
---             local sum_x, sum_y = 0, 0
---             for _, p in ipairs(cluster) do
---                 sum_x = sum_x + p.x
---                 sum_y = sum_y + p.y
---             end
---             local avg = {
---                 x = sum_x / #cluster,
---                 y = sum_y / #cluster
---             }
---             table.insert(main_path, avg)
---         end
-
---         -- 删除被处理过的点（从后往前删）
---         table.sort(to_remove, function(a, b)
---             return a > b
---         end)
---         for _, idx in ipairs(to_remove) do
---             table.remove(remaining, idx)
---         end
---     end
-
---     log(string.format("[MAIN PATH] Extracted %d points (including repeated corners)", #main_path))
---     return main_path
--- end
-
--- 过滤重复点，只保留一份
 function RemoveDuplicatePoints(points, epsilon)
     local unique_points = {}
     for i = 1, #points do
@@ -1154,16 +1004,16 @@ function remove_step_jumps(points, distance_threshold)
     while i < #points do
         local d = point_distance(points[i], points[i + 1])
         if d > distance_threshold then
-            table.remove(points, i)  -- 删除当前点
-            i = 1                    -- 重头开始
+            table.remove(points, i)  
+            i = 1                    
         else
-            i = i + 1                -- 继续往下检查
+            i = i + 1                
         end
     end
     return points
 end
 
--- 查找每个点的邻居
+
 function region_query(points, center_idx, radius)
     local neighbors = {}
     local center = points[center_idx]
@@ -1175,7 +1025,7 @@ function region_query(points, center_idx, radius)
     return neighbors
 end
 
--- 基于邻接合并构造簇（简单连通聚类）
+
 function find_clusters(points, radius)
     local visited = {}
     local clusters = {}
@@ -1205,7 +1055,7 @@ function find_clusters(points, radius)
     return clusters
 end
 
--- 查找最大簇
+
 function find_largest_cluster(points, radius)
     local clusters = find_clusters(points, radius)
     local largest = {}

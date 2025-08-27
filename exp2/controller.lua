@@ -26,9 +26,9 @@ local is_exist_segments_demo = false
 
 local EPS = 1e-9
 local score_teacher = 0
-local noise_turn = 0.1 -- 轨迹点噪声，单位弧度
-local noise_step = 0.5 -- 轨迹点噪声，单位厘米
-local noise_length = 1.0 -- 轨迹点噪声，单位厘米
+local noise_turn = 0.1 
+local noise_step = 0.5 
+local noise_length = 1.0 
 role = "idle"
 is_following = false
 
@@ -78,7 +78,7 @@ function init()
     robot.range_and_bearing.clear_data()
 
     if string.find(robot.id, "^demo") then
-        --   math.randomseed(os.time() + tonumber(string.sub(robot.id, 5))) -- 确保不同 demo 随机不同
+        --   math.randomseed(os.time() + tonumber(string.sub(robot.id, 5))) 
         role = "teacher"
         robot.leds.set_all_colors("green")
         robot.range_and_bearing.set_data(2, string.byte(robot.id, 5))
@@ -117,7 +117,7 @@ function step()
             if robot.id == "demo" then
                 -- log("[DEBUG] Robot is the demonstrator, executing polygon motion.")
                 --    PolygonMotion()
-            else -- 有问题,learner变成teacher后，还是会执行PolygonMotion，但现在是变成teacher后不做imitate运动，考虑要保存之前学习到的轨迹
+            else 
                 -- log("[DEBUG] Robot is not the demonstrator, skipping polygon motion.")
                 -- ImitateTrajectory()
             end
@@ -382,7 +382,7 @@ function PolygonMotion(polygon_sides)
     end
 
     if IsObstacleAhead(0.2) then
-        robot.wheels.set_velocity(0, 0) -- 暂停
+        robot.wheels.set_velocity(0, 0) 
         return
     end
 
@@ -853,7 +853,7 @@ function ComputeImitationQuality(demo_segments, learner_segments)
     local len_diff_sum = 0
     local min_len = math.min(#demo_segments, #learner_segments)
 
-    -- 计算长度误差
+
     for i = 1, min_len do
         local d_seg = demo_segments[i]
         local l_seg = learner_segments[i]
@@ -867,7 +867,6 @@ function ComputeImitationQuality(demo_segments, learner_segments)
         Ql = 1 - (len_diff_sum / len_sum)
     end
 
-    -- 改进的 Qa：用转角差而非绝对方向角差
     local demo_turn_sum = 0
     local turn_diff_sum = 0
 
@@ -885,10 +884,8 @@ function ComputeImitationQuality(demo_segments, learner_segments)
         Qa = 1 - (turn_diff_sum / demo_turn_sum)
     end
 
-    -- 段数匹配质量
     local Qs = 1 - math.abs(#learner_segments - #demo_segments) / #demo_segments
 
-    -- 加权合并
     local L, A, S = 2, 3, 1
     local quality = (L * Ql + A * Qa + S * Qs) / (L + A + S)
     if quality < 0 then
@@ -903,7 +900,7 @@ function IsObstacleAhead(threshold)
         local sensor = robot.proximity[i]
         local angle = sensor.angle
         local value = sensor.value
-        -- 前方 ±30度内 && 强度大于阈值
+
         if math.abs(angle) < math.rad(30) and value > threshold then
             return true
         end
@@ -973,7 +970,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
         local cluster = {ref}
         local to_remove = {1}
 
-        -- 聚合半径范围内收集近邻点
+
         for i = 2, #remaining do
             local p = remaining[i]
             if point_distance(p, ref) <= radius then
@@ -982,7 +979,6 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             end
         end
 
-        -- 判断是否为“重复点”（在 repeat_eps 内重复 min_repeat 次以上）
         local repeat_count = 0
         for _, p in ipairs(points) do
             if point_distance(p, ref) <= repeat_eps then
@@ -990,15 +986,11 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             end
         end
 
-        --   if repeat_count >= min_repeat then
-        --      -- 作为拐点：把 cluster 中所有点原样加入
-        --      for _, p in ipairs(cluster) do
-        --         table.insert(main_path, {x = p.x, y = p.y})
-        --      end
+    
         local is_turning = is_cluster_turning(cluster, math.rad(20))
 
         if is_turning then
-            -- 是拐角：保留所有点
+      
             for _, p in ipairs(cluster) do
                 table.insert(main_path, {
                     x = p.x,
@@ -1007,7 +999,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             end
 
         elseif repeat_count >= min_repeat then
-            -- 如果是重复点（停留），就只取一个平均点加入主路径
+           
             local sum_x, sum_y = 0, 0
             for _, p in ipairs(cluster) do
                 sum_x = sum_x + p.x
@@ -1020,7 +1012,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             table.insert(main_path, avg)
 
         elseif #cluster >= min_support then
-            -- 否则正常取平均聚合
+       
             local sum_x, sum_y = 0, 0
             for _, p in ipairs(cluster) do
                 sum_x = sum_x + p.x
@@ -1033,7 +1025,7 @@ function ExtractMainPathUnique(points, radius, min_support, repeat_eps, min_repe
             table.insert(main_path, avg)
         end
 
-        -- 删除被处理过的点（从后往前删）
+
         table.sort(to_remove, function(a, b)
             return a > b
         end)
@@ -1106,19 +1098,19 @@ function RemoveStaticRepeatsAndJumps(points, repeat_eps, jump_dist)
         local d_prev = point_distance(prev, curr)
         local d_next = point_distance(curr, next)
 
-        -- 跳变点：与前后都远
+   
         if d_prev > jump_dist and d_next > jump_dist then
             log(string.format("[JUMP] Removed sudden jump at (%.2f, %.2f)", curr.x, curr.y))
-            -- 重复点：与上一个保留点太近（静止）
+       
         elseif point_distance(last_kept, curr) < repeat_eps then
-            -- 不保存
+ 
         else
             table.insert(filtered, curr)
             last_kept = curr
         end
     end
 
-    table.insert(filtered, points[#points]) -- 最后一个也保留
+    table.insert(filtered, points[#points]) 
     return filtered
 end
 
@@ -1128,7 +1120,7 @@ function point_distance(p1, p2)
     return math.sqrt(dx * dx + dy * dy)
 end
 
--- 过滤重复点，只保留一份
+
 function RemoveDuplicatePoints(points, epsilon)
     local unique_points = {}
     for i = 1, #points do
@@ -1151,16 +1143,16 @@ function remove_step_jumps(points, distance_threshold)
     while i < #points do
         local d = point_distance(points[i], points[i + 1])
         if d > distance_threshold then
-            table.remove(points, i) -- 删除当前点
-            i = 1 -- 重头开始
+            table.remove(points, i) 
+            i = 1 
         else
-            i = i + 1 -- 继续往下检查
+            i = i + 1 
         end
     end
     return points
 end
 
--- 查找每个点的邻居
+
 function region_query(points, center_idx, radius)
     local neighbors = {}
     local center = points[center_idx]
@@ -1172,7 +1164,7 @@ function region_query(points, center_idx, radius)
     return neighbors
 end
 
--- 基于邻接合并构造簇（简单连通聚类）
+
 function find_clusters(points, radius)
     local visited = {}
     local clusters = {}
@@ -1202,7 +1194,7 @@ function find_clusters(points, radius)
     return clusters
 end
 
--- 查找最大簇
+
 function find_largest_cluster(points, radius)
     local clusters = find_clusters(points, radius)
     local largest = {}
@@ -1220,7 +1212,7 @@ local function mean_list(xs)
     return (#xs > 0) and (s / #xs) or 0.0
 end
 
-local function var_list(xs)  -- 无偏方差
+local function var_list(xs)  
     local n = #xs
     if n <= 1 then return 0.0 end
     local m = mean_list(xs)
@@ -1235,11 +1227,11 @@ end
 function ScoreSegmentsStability(segments_observed)
     local n = #segments_observed
     if n < 2 then
-        -- 段数不够无法计算转角差，给一个低分；你也可以返回 0
+     
         return 0.2, {len_var=0, turn_var=0, len_std=0, turn_std=0, len_mean=0, turn_mean=0}
     end
 
-    -- 1) 长度序列
+   
     local lengths = {}
     for i = 1, n do
         lengths[i] = segments_observed[i].distance or 0.0
@@ -1248,7 +1240,6 @@ function ScoreSegmentsStability(segments_observed)
     local len_var  = var_list(lengths)
     local len_std  = math.sqrt(len_var)
 
-    -- 2) 相邻段角度差序列（与你的 Qa 一致：用 angle_diff 包络到 [-pi,pi]）:contentReference[oaicite:1]{index=1}
     local turns = {}
     for i = 2, n do
         local dth = math.abs(angle_diff(segments_observed[i].angle, segments_observed[i-1].angle))
@@ -1258,18 +1249,17 @@ function ScoreSegmentsStability(segments_observed)
     local turn_var  = (#turns > 1) and var_list(turns) or 0.0
     local turn_std  = math.sqrt(turn_var)
 
-    -- 3) 把“方差/波动”映射为 [0,1] 稳定性分数（越小波动→越高分）
-    --    这里用简单稳健的 1/(1+CV) 形式（CV=std/mean），避免量纲问题
+  
     local cv_len  = len_std  / math.max(len_mean,  EPS)
-    local cv_turn = turn_std / math.pi              -- 角度用 π 归一化
+    local cv_turn = turn_std / math.pi             
 
     local score_len  = 1.0 / (1.0 + cv_len)
     local score_turn = 1.0 / (1.0 + cv_turn)
 
-    -- 4) 综合分数（等权）；如需偏好角度或长度可加权
+
     local score = 0.5 * (score_len + score_turn)
 
-    -- 可选：打印调试
+   
     -- log(string.format("[STABILITY] score=%.4f (len_var=%.5f, turn_var=%.5f, cv_len=%.4f, cv_turn=%.4f)",
     --     score, len_var, turn_var, cv_len, cv_turn))
     print(string.format("[STABILITY] score=%.4f", score))
