@@ -1,5 +1,5 @@
 # Robot-to-robot imitation learning in robot swarms
-Author:Qi Liu
+Author: Qi Liu
 
 Msc Robotics, University of Bristol & University of the West of England
 
@@ -22,11 +22,11 @@ ARGoS configuration file. Defines the simulation environment (arena, robots, sen
 ### controller.lua
 Main controller script for the foot-bot robots. Implements the demonstrator and learner behaviors, including trajectory generation, observation, and imitation logic.
 
-### result/
+### result
 Contains outputs from the experiments:
 
-exp1/: imitation quality scores Q for the single-teacher experiments.
+exp1: imitation quality scores Q for the single-teacher experiments.
 
-exp2/: includes both the demonstrators’ trajectory variance scores S  and the learner’s imitation quality scores Q.
+exp2: includes both the demonstrators’ trajectory variance scores S  and the learner’s imitation quality scores Q.
 
 Note: The demonstrator's trajectory shape and number of repetitions can be adjusted by modifying the variables polygon_sides and demo_repeat_target in the Lua controller file.
