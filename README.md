@@ -1,5 +1,6 @@
 # Robot-to-robot imitation learning in robot swarms
 Qi Liu, Msc Robotics, University of Bristol & University of the West of England
+
 This repository contains the source code, ARGoS configuration files, and experimental results used in the dissertation **"Robot-to-Robot Imitation Learning in Robot Swarms"**.  
 It implements and evaluates imitation learning experiments with single-teacher and multi-teacher scenarios using foot-bot robots in the ARGoS3 simulator.
 
